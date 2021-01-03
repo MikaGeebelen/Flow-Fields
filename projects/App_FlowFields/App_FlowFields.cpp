@@ -11,9 +11,14 @@ using namespace Elite;
 App_FlowFields::~App_FlowFields()
 {
 	SAFE_DELETE(m_pGridGraph);
+	SAFE_DELETE(m_pBFS);
 	for (BaseAgent* pAgent : m_pAgents)
 	{
 		SAFE_DELETE(pAgent);
+	}
+	for (Vector2* vec: m_Directions)
+	{
+		SAFE_DELETE(vec);
 	}
 }
 
@@ -36,23 +41,31 @@ void App_FlowFields::Start()
 
 	//initialize graph
 	m_pGridGraph = new Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>{false};
-	m_pGridGraph->InitializeGrid(14, 14, 10, false, true);
+	m_pGridGraph->InitializeGrid(m_ColsRows, m_ColsRows, int(m_TrimWorldSize / m_ColsRows), false, true);
+	m_pBFS = new Elite::BFS< Elite::InfluenceNode, Elite::GraphConnection>{m_pGridGraph};
+	for (int i = 0; i < m_ColsRows * m_ColsRows; i++)
+	{
+		m_Directions.push_back(new Vector2{});
+	}
 }
 
 void App_FlowFields::Update(float deltaTime)
 {
 	for (BaseAgent* pAgent : m_pAgents)
 	{
-		pAgent->TrimToWorld(Elite::Vector2{ 0.f,0.f }, Elite::Vector2{m_TrimWorldSize,m_TrimWorldSize });
+		pAgent->TrimToWorld(Vector2{ 0.f,0.f }, Vector2{m_TrimWorldSize,m_TrimWorldSize });
+		const float agentSpeed{10};
+		pAgent->SetLinearVelocity(*m_Directions.at(m_pGridGraph->GetNodeAtWorldPos(Clamp(pAgent->GetPosition(), m_TrimWorldSize -1.f))->GetIndex())* agentSpeed);
+
 		pAgent->Update(deltaTime);
 	}
 
 
 	if (INPUTMANAGER->IsMouseButtonUp(InputMouseButton::eLeft))
-		AddInfluenceOnMouseClick(InputMouseButton::eLeft, 100);
+		SetTargetOnMouseClick(InputMouseButton::eLeft);
 
-	if (INPUTMANAGER->IsMouseButtonUp(InputMouseButton::eRight))
-		AddInfluenceOnMouseClick(InputMouseButton::eRight, -100);
+	if (INPUTMANAGER->IsMouseButtonUp(InputMouseButton::eMiddle))
+		AddWallOnMouseClick(InputMouseButton::eMiddle);
 
 	//------- UI --------
 #ifdef PLATFORM_WINDOWS
@@ -112,9 +125,16 @@ void App_FlowFields::Render(float deltaTime) const
 	{
 		pAgent->Render(deltaTime);
 	}
+	for (int c = 0; c < m_ColsRows; c++)
+	{
+		for (int r = 0; r < m_ColsRows; r++)
+		{
+			DEBUGRENDERER2D->DrawDirection(m_pGridGraph->GetNodeWorldPos(c, r), *m_Directions.at(m_pGridGraph->GetNode(c, r)->GetIndex()), 3.f, {1.f,0.f,0.f});
+		}
+	}
 }
 
-void App_FlowFields::AddInfluenceOnMouseClick(Elite::InputMouseButton mouseBtn, float inf)
+void App_FlowFields::AddWallOnMouseClick(Elite::InputMouseButton mouseBtn)
 {
 	auto mouseData = INPUTMANAGER->GetMouseData(Elite::InputType::eMouseButton, mouseBtn);
 	auto mousePos = DEBUGRENDERER2D->GetActiveCamera()->ConvertScreenToWorld(Vector2{ (float)mouseData.X, (float)mouseData.Y });
@@ -127,7 +147,54 @@ void App_FlowFields::AddInfluenceOnMouseClick(Elite::InputMouseButton mouseBtn, 
 		}
 		else
 		{
-			m_pGridGraph->SetInfluenceAtPosition(mousePos, inf);
+			m_pGridGraph->SetInfluenceAtPosition(mousePos,-100.f);
+		}
+
+		m_pBFS->CreateHeatMap(m_pGridGraph->GetNodeAtWorldPos(CurrentTarget));
+		//set the new vectors after heatmap update
+		SetDirections();
+	}
+}
+
+void App_FlowFields::SetTargetOnMouseClick(Elite::InputMouseButton mouseBtn)
+{
+	auto mouseData = INPUTMANAGER->GetMouseData(Elite::InputType::eMouseButton, mouseBtn);
+	auto mousePos = DEBUGRENDERER2D->GetActiveCamera()->ConvertScreenToWorld(Vector2{ (float)mouseData.X, (float)mouseData.Y });
+
+	if (m_pGridGraph->IsNodeValid(m_pGridGraph->GetNodeAtWorldPos(mousePos)->GetIndex()))
+	{
+		m_pBFS->CreateHeatMap(m_pGridGraph->GetNodeAtWorldPos(mousePos));
+		CurrentTarget = mousePos;
+		//set the new vectors after heatmap update
+		SetDirections();
+	}
+}
+
+void App_FlowFields::SetDirections() 
+{
+
+	for (int c = 0; c < m_ColsRows; c++)
+	{
+		for (int r = 0; r < m_ColsRows; r++)
+		{
+			float LowestInfluance{FLT_MAX};
+			int LowestInfluanceIndex{-1};
+			int originalIndex{ m_pGridGraph->GetNode(c, r)->GetIndex() };
+
+			for (Elite::GraphConnection* con : m_pGridGraph->GetConnections(m_pGridGraph->GetNode(c, r)->GetIndex()))
+			{
+				if (LowestInfluance > m_pGridGraph->GetNode(con->GetTo())->GetInfluence() && !(m_pGridGraph->GetNode(con->GetTo())->GetInfluence() < 0.f))
+				{
+					LowestInfluance = m_pGridGraph->GetNode(con->GetTo())->GetInfluence();
+					LowestInfluanceIndex = con->GetTo();
+				}
+			}
+			*m_Directions.at(originalIndex) = (m_pGridGraph->GetNodeWorldPos(LowestInfluanceIndex) - m_pGridGraph->GetNodeWorldPos(originalIndex)).GetNormalized();
+
+			if (m_pGridGraph->GetNode(c, r)->GetInfluence() < 0.1f)
+			{
+				*m_Directions.at(originalIndex) = Vector2{ 0,0 };
+			}
 		}
 	}
 }

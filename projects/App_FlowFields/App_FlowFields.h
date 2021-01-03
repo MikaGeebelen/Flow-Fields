@@ -12,6 +12,7 @@
 
 #include "projects/Shared/BaseAgent.h"
 #include "framework/EliteAI/EliteGraphs/EInfluenceMap.h"
+#include "framework/EliteAI/EliteGraphs/EliteGraphAlgorithms/EBFS.h"
 //-----------------------------------------------------------------
 // Application
 //-----------------------------------------------------------------
@@ -28,23 +29,27 @@ public:
 	void Render(float deltaTime) const override;
 
 private:
-	
-
 	//agents
 	const int m_AgentAmount{ 40 };
 	std::vector<BaseAgent*> m_pAgents;
 
 	//world
 	const float m_TrimWorldSize{ 140.f };
-
+	const int m_ColsRows{14};
+	Elite::Vector2 CurrentTarget{};
 	//graph
 	Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>* m_pGridGraph;
+	Elite::BFS< Elite::InfluenceNode, Elite::GraphConnection>* m_pBFS;//used to generate heatmap
 	Elite::EGraphRenderer m_GraphRenderer;
+
+	std::vector<Elite::Vector2*> m_Directions;
 
 	//C++ make the class non-copyable
 	App_FlowFields(const App_FlowFields&) = delete;
 	App_FlowFields& operator=(const App_FlowFields&) = delete;
 
-	void AddInfluenceOnMouseClick(Elite::InputMouseButton mouseBtn, float inf);
+	void AddWallOnMouseClick(Elite::InputMouseButton mouseBtn);
+	void SetTargetOnMouseClick(Elite::InputMouseButton mouseBtn);
+	void SetDirections();
 };
 #endif

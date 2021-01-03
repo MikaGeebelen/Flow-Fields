@@ -9,6 +9,7 @@ namespace Elite
 		BFS(IGraph<T_NodeType, T_ConnectionType>* pGraph);
 
 		std::vector<T_NodeType*> FindPath(T_NodeType* pStartNode, T_NodeType* pDestinationNode);
+		void CreateHeatMap(InfluenceNode* pStartNode);
 	private:
 		IGraph<T_NodeType, T_ConnectionType>* m_pGraph;
 	};
@@ -58,6 +59,44 @@ namespace Elite
 		path.push_back(pStartNode);
 		std::reverse(path.begin(), path.end());
 		return path;
+	}
+
+	template <class T_NodeType, class T_ConnectionType>
+	void BFS<T_NodeType, T_ConnectionType>::CreateHeatMap(InfluenceNode* pDestinationNode)
+	{
+		//HeatMap only works on influanceMaps
+		//using the influance parameter to set the distance of each square to the target node
+		std::list<InfluenceNode*> openList;//nodes to search 
+		std::list<InfluenceNode*> closedList;//searched nodes
+
+		openList.push_back(pDestinationNode);
+
+		pDestinationNode->SetInfluence(0);
+
+		
+		while (!openList.empty())//keep running till all possible nodes are done
+		{
+			InfluenceNode* currentNode = openList.front();
+			openList.pop_front();
+			
+			for (auto con : m_pGraph->GetNodeConnections(currentNode->GetIndex()))
+			{
+				InfluenceNode* nextNode = m_pGraph->GetNode(con->GetTo());
+				if (std::find(closedList.begin(), closedList.end(), nextNode) == closedList.end() && std::find(openList.begin(), openList.end(), nextNode) == openList.end())//check if node is searched
+				{
+					if (!(nextNode->GetInfluence() < 0.f))
+					{
+						openList.push_back(nextNode);
+						nextNode->SetInfluence(currentNode->GetInfluence() + 5);
+					}
+
+					if (std::find(closedList.begin(), closedList.end(), currentNode) == closedList.end())//check if node is searched
+					{
+						closedList.push_back(currentNode);
+					}
+				}
+			}
+		}
 	}
 }
 
