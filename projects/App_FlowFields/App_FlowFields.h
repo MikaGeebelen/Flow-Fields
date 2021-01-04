@@ -11,8 +11,10 @@
 #include "framework\EliteAI\EliteGraphs\EliteGraphUtilities\EGraphRenderer.h"
 
 #include "projects/Shared/BaseAgent.h"
+#include "projects/Shared/NavigationColliderElement.h"
 #include "framework/EliteAI/EliteGraphs/EInfluenceMap.h"
 #include "framework/EliteAI/EliteGraphs/EliteGraphAlgorithms/EBFS.h"
+
 //-----------------------------------------------------------------
 // Application
 //-----------------------------------------------------------------
@@ -30,15 +32,19 @@ public:
 
 private:
 	//agents
-	const int m_AgentAmount{ 40 };
+	const int m_AgentAmount{ 200 };
 	std::vector<BaseAgent*> m_pAgents;
 
 	//world
-	const float m_TrimWorldSize{ 140.f };
-	const int m_ColsRows{14};
+	float m_TrimWorldSize{ };
+	const int m_CellSize{10};
+	const int m_ColsRows{25};
 	Elite::Vector2 CurrentTarget{};
+
+	std::vector<NavigationColliderElement*> m_Colliders;
 	//graph
-	Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>* m_pGridGraph;
+	//Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>* m_pGridGraph;
+	Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>* m_pGridGraph;
 	Elite::BFS< Elite::InfluenceNode, Elite::GraphConnection>* m_pBFS;//used to generate heatmap
 	Elite::EGraphRenderer m_GraphRenderer;
 

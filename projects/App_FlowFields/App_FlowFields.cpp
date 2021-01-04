@@ -20,6 +20,10 @@ App_FlowFields::~App_FlowFields()
 	{
 		SAFE_DELETE(vec);
 	}
+	for (NavigationColliderElement* collider: m_Colliders)
+	{
+		SAFE_DELETE(collider);
+	}
 }
 
 //Functions
@@ -32,16 +36,19 @@ void App_FlowFields::Start()
 	DEBUGRENDERER2D->GetActiveCamera()->SetMoveLocked(false);
 	DEBUGRENDERER2D->GetActiveCamera()->SetZoomLocked(false);
 
+
 	//initialize agents
+	m_TrimWorldSize = float(m_ColsRows * m_CellSize)-1.f;
 	for (int i = 0; i < m_AgentAmount; i++)
 	{
 		m_pAgents.push_back(new BaseAgent{});
-		m_pAgents.at(i)->SetPosition(Elite::Vector2{ randomFloat(0.f,m_TrimWorldSize),randomFloat(0.f,m_TrimWorldSize) });
+		m_pAgents.at(i)->SetPosition(Elite::Vector2{ randomFloat(1.f,m_TrimWorldSize),randomFloat(1.f,m_TrimWorldSize) });
 	}
 
 	//initialize graph
-	m_pGridGraph = new Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>{false};
-	m_pGridGraph->InitializeGrid(m_ColsRows, m_ColsRows, int(m_TrimWorldSize / m_ColsRows), false, true);
+	//m_pGridGraph = new Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>{false};
+	m_pGridGraph = new Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>{ false };
+	m_pGridGraph->InitializeGrid(m_ColsRows, m_ColsRows, m_CellSize, false, true);
 	m_pBFS = new Elite::BFS< Elite::InfluenceNode, Elite::GraphConnection>{m_pGridGraph};
 	for (int i = 0; i < m_ColsRows * m_ColsRows; i++)
 	{
@@ -51,12 +58,14 @@ void App_FlowFields::Start()
 
 void App_FlowFields::Update(float deltaTime)
 {
+	//m_pGridGraph->SetNodeColorsBasedOnInfluence();
 	for (BaseAgent* pAgent : m_pAgents)
 	{
-		pAgent->TrimToWorld(Vector2{ 0.f,0.f }, Vector2{m_TrimWorldSize,m_TrimWorldSize });
+		pAgent->TrimToWorld(Vector2{ 1.f,1.f }, Vector2{m_TrimWorldSize,m_TrimWorldSize });
 		const float agentSpeed{10};
-		pAgent->SetLinearVelocity(*m_Directions.at(m_pGridGraph->GetNodeAtWorldPos(Clamp(pAgent->GetPosition(), m_TrimWorldSize -1.f))->GetIndex())* agentSpeed);
-
+		pAgent->SetLinearVelocity(*m_Directions.at(m_pGridGraph->GetNodeAtWorldPos(pAgent->GetPosition())->GetIndex())* agentSpeed);
+		//std::cout << m_pGridGraph->GetNodeAtWorldPos(pAgent->GetPosition())->GetIndex() << "\n";
+		DEBUGRENDERER2D->DrawDirection(pAgent->GetPosition(), *m_Directions.at(m_pGridGraph->GetNodeAtWorldPos(pAgent->GetPosition())->GetIndex()), agentSpeed, { 0.f,1.f,0.f });
 		pAgent->Update(deltaTime);
 	}
 
@@ -119,11 +128,15 @@ void App_FlowFields::Update(float deltaTime)
 
 void App_FlowFields::Render(float deltaTime) const
 {
-	m_pGridGraph->SetNodeColorsBasedOnInfluence();
+	//m_pGridGraph->SetNodeColorsBasedOnInfluence();
 	m_GraphRenderer.RenderGraph(m_pGridGraph, true, false, false, true);
 	for (BaseAgent* pAgent: m_pAgents)
 	{
 		pAgent->Render(deltaTime);
+	}
+	for (NavigationColliderElement* collider : m_Colliders)
+	{
+		collider->RenderElement();
 	}
 	for (int c = 0; c < m_ColsRows; c++)
 	{
@@ -143,11 +156,24 @@ void App_FlowFields::AddWallOnMouseClick(Elite::InputMouseButton mouseBtn)
 	{
 		if (m_pGridGraph->GetNodeAtWorldPos(mousePos)->GetInfluence() < 0.f)
 		{
-			m_pGridGraph->SetInfluenceAtPosition(mousePos, 0.f);
+			InfluenceNode* temp = m_pGridGraph->GetNodeAtWorldPos(mousePos);
+			temp->SetInfluence(0.f);//set wall
+			for (NavigationColliderElement* collider : m_Colliders)
+			{
+				if (Elite::DistanceSquared(collider->GetPosition(),mousePos)<float(m_CellSize/2 * m_CellSize/2))
+				{
+					m_Colliders.erase(std::remove(m_Colliders.begin(), m_Colliders.end(), collider));
+					SAFE_DELETE(collider);
+				}
+			}
+			temp = nullptr;	
 		}
 		else
 		{
-			m_pGridGraph->SetInfluenceAtPosition(mousePos,-100.f);
+			InfluenceNode* temp = m_pGridGraph->GetNodeAtWorldPos(mousePos);
+			temp->SetInfluence(-100.f);//set wall
+			m_Colliders.push_back(new NavigationColliderElement{ m_pGridGraph->GetNodeWorldPos(temp),float(m_CellSize),float(m_CellSize) });
+			temp = nullptr;
 		}
 
 		m_pBFS->CreateHeatMap(m_pGridGraph->GetNodeAtWorldPos(CurrentTarget));

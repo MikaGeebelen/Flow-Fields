@@ -16,9 +16,10 @@ public:
 	NavigationColliderElement(const Elite::Vector2& position, float width, float height);
 	~NavigationColliderElement();
 
+
 	//--- Functions ---
 	void RenderElement();
-
+	const Elite::Vector2& GetPosition();
 private:
 	//--- Datamembers ---
 	RigidBody* m_pRigidBody = nullptr;

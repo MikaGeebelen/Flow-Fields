@@ -28,3 +28,8 @@ void NavigationColliderElement::RenderElement()
 {
 	//Do Nothing
 }
+
+const Elite::Vector2& NavigationColliderElement::GetPosition()
+{
+	return m_Position;
+}
