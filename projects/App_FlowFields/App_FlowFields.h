@@ -56,6 +56,7 @@ private:
 
 	void AddWallOnMouseClick(Elite::InputMouseButton mouseBtn);
 	void SetTargetOnMouseClick(Elite::InputMouseButton mouseBtn);
+	void SetNodeColorsBasedOnHeatMap();
 	void SetDirections();
 };
 #endif

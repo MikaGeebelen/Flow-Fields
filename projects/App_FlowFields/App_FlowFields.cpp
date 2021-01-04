@@ -81,7 +81,7 @@ void App_FlowFields::Update(float deltaTime)
 #pragma region UI
 	{
 		//Setup
-		int menuWidth = 150;
+		int menuWidth = 200;
 		int const width = DEBUGRENDERER2D->GetActiveCamera()->GetWidth();
 		int const height = DEBUGRENDERER2D->GetActiveCamera()->GetHeight();
 		bool windowActive = true;
@@ -100,6 +100,18 @@ void App_FlowFields::Update(float deltaTime)
 		ImGui::Separator();
 		ImGui::Spacing();
 		ImGui::Spacing();
+
+		ImGui::Text("left click = set target");
+		ImGui::Spacing();
+		ImGui::Text("middle mouse = make wall");
+		ImGui::Spacing();
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+
 
 		ImGui::Text("STATS");
 		ImGui::Indent();
@@ -179,6 +191,7 @@ void App_FlowFields::AddWallOnMouseClick(Elite::InputMouseButton mouseBtn)
 		m_pBFS->CreateHeatMap(m_pGridGraph->GetNodeAtWorldPos(CurrentTarget));
 		//set the new vectors after heatmap update
 		SetDirections();
+		SetNodeColorsBasedOnHeatMap();
 	}
 }
 
@@ -193,6 +206,35 @@ void App_FlowFields::SetTargetOnMouseClick(Elite::InputMouseButton mouseBtn)
 		CurrentTarget = mousePos;
 		//set the new vectors after heatmap update
 		SetDirections();
+		SetNodeColorsBasedOnHeatMap();
+	}
+}
+
+void App_FlowFields::SetNodeColorsBasedOnHeatMap()
+{
+	const Elite::Color neutralColor{0.2f,0.2f,0.2f};
+	const Elite::Color positiceColor{0.f,1.f,1.f};
+
+	float MaxInfluance{};
+	for (InfluenceNode* pNode : m_pGridGraph->GetAllActiveNodes())
+	{
+		if (pNode->GetInfluence() > MaxInfluance)
+		{
+			MaxInfluance = pNode->GetInfluence();
+		}
+	}
+
+	for (InfluenceNode* pNode : m_pGridGraph->GetAllActiveNodes())
+	{
+		float influence = pNode->GetInfluence();
+		float relativeInfluence = abs(influence) / MaxInfluance;
+
+		Color nodeColor = Elite::Color{
+		Lerp(neutralColor.r, positiceColor.r, relativeInfluence),
+		Lerp(neutralColor.g, positiceColor.g, relativeInfluence),
+		Lerp(neutralColor.b, positiceColor.b, relativeInfluence) };
+
+		pNode->SetColor(nodeColor);
 	}
 }
 
@@ -215,8 +257,11 @@ void App_FlowFields::SetDirections()
 					LowestInfluanceIndex = con->GetTo();
 				}
 			}
-			*m_Directions.at(originalIndex) = (m_pGridGraph->GetNodeWorldPos(LowestInfluanceIndex) - m_pGridGraph->GetNodeWorldPos(originalIndex)).GetNormalized();
 
+			if (m_pGridGraph->IsNodeValid(LowestInfluanceIndex))
+			{
+				*m_Directions.at(originalIndex) = (m_pGridGraph->GetNodeWorldPos(LowestInfluanceIndex) - m_pGridGraph->GetNodeWorldPos(originalIndex)).GetNormalized();
+			}
 			if (m_pGridGraph->GetNode(c, r)->GetInfluence() < 0.1f)
 			{
 				*m_Directions.at(originalIndex) = Vector2{ 0,0 };

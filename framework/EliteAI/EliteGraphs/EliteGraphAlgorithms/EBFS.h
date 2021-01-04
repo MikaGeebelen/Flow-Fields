@@ -87,7 +87,7 @@ namespace Elite
 					if (!(nextNode->GetInfluence() < 0.f))
 					{
 						openList.push_back(nextNode);
-						nextNode->SetInfluence(currentNode->GetInfluence() + 5);
+						nextNode->SetInfluence(currentNode->GetInfluence() + 1);
 					}
 
 					if (std::find(closedList.begin(), closedList.end(), currentNode) == closedList.end())//check if node is searched
