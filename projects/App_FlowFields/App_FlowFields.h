@@ -49,8 +49,8 @@ private:
 
 	std::vector<Elite::Vector2*> m_Directions;
 	//rendering
-	bool m_DrawVectorField;
-	bool m_DrawGrid;
+	bool m_DrawVectorField{true};
+	bool m_DrawGrid{true};
 	//C++ make the class non-copyable
 	App_FlowFields(const App_FlowFields&) = delete;
 	App_FlowFields& operator=(const App_FlowFields&) = delete;

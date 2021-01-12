@@ -29,14 +29,6 @@ App_FlowFields::~App_FlowFields()
 //Functions
 void App_FlowFields::Start()
 {
-	//Initialization of your application. If you want access to the physics world you will need to store it yourself.
-	//----------- CAMERA ------------
-	DEBUGRENDERER2D->GetActiveCamera()->SetZoom(80.f);
-	DEBUGRENDERER2D->GetActiveCamera()->SetCenter(Elite::Vector2(0, 0));
-	DEBUGRENDERER2D->GetActiveCamera()->SetMoveLocked(false);
-	DEBUGRENDERER2D->GetActiveCamera()->SetZoomLocked(false);
-
-
 	//initialize agents
 	m_TrimWorldSize = float(m_ColsRows * m_CellSize)-1.f;
 	for (int i = 0; i < m_AgentAmount; i++)
@@ -53,6 +45,13 @@ void App_FlowFields::Start()
 	{
 		m_Directions.push_back(new Vector2{});
 	}
+
+	//Initialization of your application. If you want access to the physics world you will need to store it yourself.
+	//----------- CAMERA ------------
+	DEBUGRENDERER2D->GetActiveCamera()->SetZoom(150.f);
+	DEBUGRENDERER2D->GetActiveCamera()->SetCenter(Elite::Vector2(m_TrimWorldSize / 2, m_TrimWorldSize / 2));
+	DEBUGRENDERER2D->GetActiveCamera()->SetMoveLocked(false);
+	DEBUGRENDERER2D->GetActiveCamera()->SetZoomLocked(false);
 }
 
 void App_FlowFields::Update(float deltaTime)
