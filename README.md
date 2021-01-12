@@ -1,12 +1,16 @@
 # Flow fields
 
+## Description
+This is an implementation on Flow Fields but what are they?
+
+
 ## Implementation
 The way I implemented the flow fields was by following three steps.
-1. generate a heatmap
-1. use the heatmap to generate a vector field
-1. pathfinder uses vectorfield to move
+1. Generate a heatmap
+1. Use the heatmap to generate a vector field
+1. Pathfinder uses vectorfield to move
 
-### Generate heatmap
+###  1. Generate heatmap
 To generate a heatmap you use a pathfinding algorithm to go over all the nodes on the grid map that the pathfinder can traverse.
 You start at the target and give that node the value of 0.
 From that node you let the pathfinding algorythm traverse all other nodes till there are no nodes left. 
@@ -22,7 +26,7 @@ It should result in something like this:
 
 ![](Images/Heatmap.PNG)
 
-### Generate vector field 
+###  2. Generate vector field 
 Now that we have a heatmap we can use it to generate a vector field.
 Each vector for each node should point towards the target or towards the direction that the pathfinder has to follow to reach the target.
 You can do this by creating a vector for each node that points to the neighboring node with the lowest value.
@@ -35,7 +39,7 @@ It should result in something like this:
  
  ![](Images/VectorField.PNG)
 
-### Movement
+###  3. Movement
 Now that we have a vector field, our pathfinders just need to use it.
 Every frame you check for each pathfinder in what node they reside and give them a direction based on the vector field value. 
 
