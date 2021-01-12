@@ -13,4 +13,4 @@ From that node you let the pathfinding algorythm traverse all other nodes till t
 Each traversed node gets the value of the previos node +1.
 
 You can visualise a heatmap by coloring the nodes based on the value you assigned them and it should result in something like this:
-
+![](Images/Heatmap.png)
