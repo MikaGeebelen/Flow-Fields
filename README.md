@@ -17,7 +17,7 @@ Since we don't have to prioritise any nodes we can just start from the center an
 
 You can visualise a heatmap by coloring the nodes based on the value you assigned them. 
 It should result in something like this:
- - yellow: target + pathfinders
+ - yellow: pathfinders
  - The closer to the target less blue.
 
 ![](Images/Heatmap.PNG)
@@ -29,7 +29,7 @@ You can do this by creating a vector for each node that points to the neighborin
 
 You can visualise this by drawing the generated vector in each node.
 It should result in something like this:
- - yellow: target + pathfinders
+ - yellow: pathfinders
  - They all point in the general direction of the target.
  
  ![](Images/VectorField.PNG)
@@ -37,3 +37,10 @@ It should result in something like this:
 ### Movement
 Now that we have a vector field our pathfinders just need to use it.
 Every frame you check for each pathfinder in what node the reside and give them a direction based on the vector field. 
+
+By drawing all the pathfinders their direction you can see if they properly use the vector field.
+It should result in something like this:
+ - yellow: pathfinders
+ - The use the same direction as the node they walk on.
+ 
+![](Images/PathfindersUseVectorField.PNG)
