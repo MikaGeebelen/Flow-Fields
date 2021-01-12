@@ -46,7 +46,6 @@ void App_FlowFields::Start()
 	}
 
 	//initialize graph
-	//m_pGridGraph = new Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>{false};
 	m_pGridGraph = new Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>{ false };
 	m_pGridGraph->InitializeGrid(m_ColsRows, m_ColsRows, m_CellSize, false, true);
 	m_pBFS = new Elite::BFS< Elite::InfluenceNode, Elite::GraphConnection>{m_pGridGraph};
@@ -58,13 +57,11 @@ void App_FlowFields::Start()
 
 void App_FlowFields::Update(float deltaTime)
 {
-	//m_pGridGraph->SetNodeColorsBasedOnInfluence();
 	for (BaseAgent* pAgent : m_pAgents)
 	{
 		pAgent->TrimToWorld(Vector2{ 1.f,1.f }, Vector2{m_TrimWorldSize,m_TrimWorldSize });
 		const float agentSpeed{10};
 		pAgent->SetLinearVelocity(*m_Directions.at(m_pGridGraph->GetNodeAtWorldPos(pAgent->GetPosition())->GetIndex())* agentSpeed);
-		//std::cout << m_pGridGraph->GetNodeAtWorldPos(pAgent->GetPosition())->GetIndex() << "\n";
 		DEBUGRENDERER2D->DrawDirection(pAgent->GetPosition(), *m_Directions.at(m_pGridGraph->GetNodeAtWorldPos(pAgent->GetPosition())->GetIndex()), agentSpeed, { 0.f,1.f,0.f });
 		pAgent->Update(deltaTime);
 	}
@@ -92,15 +89,13 @@ void App_FlowFields::Update(float deltaTime)
 		ImGui::SetWindowFocus();
 		ImGui::PushItemWidth(70);
 		//Elements
-		ImGui::Text("CONTROLS");
-		ImGui::Indent();
-		ImGui::Unindent();
-
+		ImGui::Text("Flow Fields");
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::Spacing();
 		ImGui::Spacing();
 
+		ImGui::Text("CONTROLS");
 		ImGui::Text("left click = set target");
 		ImGui::Spacing();
 		ImGui::Text("middle mouse = make wall");
@@ -110,8 +105,6 @@ void App_FlowFields::Update(float deltaTime)
 		ImGui::Separator();
 		ImGui::Spacing();
 		ImGui::Spacing();
-
-
 
 		ImGui::Text("STATS");
 		ImGui::Indent();
@@ -124,25 +117,29 @@ void App_FlowFields::Update(float deltaTime)
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		ImGui::Text("Flow Fields");
+		ImGui::Text("Render");
 		ImGui::Spacing();
+		ImGui::Checkbox("VectorField", &m_DrawVectorField);
 		ImGui::Spacing();
+		ImGui::Checkbox("Grid", &m_DrawGrid);
 
+		ImGui::Spacing();
+		ImGui::Separator();
 		//End
 		ImGui::PopAllowKeyboardFocus();
 		ImGui::End();
 	}
 #pragma endregion
 #endif
-	
-
 }
 
 void App_FlowFields::Render(float deltaTime) const
 {
-	//m_pGridGraph->SetNodeColorsBasedOnInfluence();
-	m_GraphRenderer.RenderGraph(m_pGridGraph, true, false, false, true);
-	for (BaseAgent* pAgent: m_pAgents)
+	if (m_DrawGrid)
+	{
+		m_GraphRenderer.RenderGraph(m_pGridGraph, true, false, false, true);
+	}
+	for (BaseAgent* pAgent : m_pAgents)
 	{
 		pAgent->Render(deltaTime);
 	}
@@ -150,11 +147,14 @@ void App_FlowFields::Render(float deltaTime) const
 	{
 		collider->RenderElement();
 	}
-	for (int c = 0; c < m_ColsRows; c++)
+	if (m_DrawVectorField)
 	{
-		for (int r = 0; r < m_ColsRows; r++)
+		for (int c = 0; c < m_ColsRows; c++)
 		{
-			DEBUGRENDERER2D->DrawDirection(m_pGridGraph->GetNodeWorldPos(c, r), *m_Directions.at(m_pGridGraph->GetNode(c, r)->GetIndex()), 3.f, {1.f,0.f,0.f});
+			for (int r = 0; r < m_ColsRows; r++)
+			{
+				DEBUGRENDERER2D->DrawDirection(m_pGridGraph->GetNodeWorldPos(c, r), *m_Directions.at(m_pGridGraph->GetNode(c, r)->GetIndex()), 3.f, { 1.f,0.f,0.f });
+			}
 		}
 	}
 }

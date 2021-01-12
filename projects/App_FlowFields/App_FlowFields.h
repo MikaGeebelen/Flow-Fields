@@ -32,7 +32,7 @@ public:
 
 private:
 	//agents
-	const int m_AgentAmount{ 200 };
+	const int m_AgentAmount{ 50 };
 	std::vector<BaseAgent*> m_pAgents;
 
 	//world
@@ -43,13 +43,14 @@ private:
 
 	std::vector<NavigationColliderElement*> m_Colliders;
 	//graph
-	//Elite::InfluenceMap<Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>>* m_pGridGraph;
 	Elite::GridGraph< Elite::InfluenceNode, Elite::GraphConnection>* m_pGridGraph;
 	Elite::BFS< Elite::InfluenceNode, Elite::GraphConnection>* m_pBFS;//used to generate heatmap
 	Elite::EGraphRenderer m_GraphRenderer;
 
 	std::vector<Elite::Vector2*> m_Directions;
-
+	//rendering
+	bool m_DrawVectorField;
+	bool m_DrawGrid;
 	//C++ make the class non-copyable
 	App_FlowFields(const App_FlowFields&) = delete;
 	App_FlowFields& operator=(const App_FlowFields&) = delete;
