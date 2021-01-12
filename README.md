@@ -30,6 +30,7 @@ You can do this by creating a vector for each node that points to the neighborin
 You can visualise this by drawing the generated vector in each node.
 It should result in something like this:
  - yellow: pathfinders
+ - red: the vector for each node
  - They all point in the general direction of the target.
  
  ![](Images/VectorField.PNG)
@@ -41,6 +42,8 @@ Every frame you check for each pathfinder in what node the reside and give them 
 By drawing all the pathfinders their direction you can see if they properly use the vector field.
 It should result in something like this:
  - yellow: pathfinders
+ - green: pathfinder direction
  - The use the same direction as the node they walk on.
  
 ![](Images/PathfindersUseVectorField.PNG)
+
