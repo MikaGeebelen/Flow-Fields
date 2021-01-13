@@ -54,7 +54,7 @@ It should result in something like this:
  - The pathfinder direction is green
  - They use the same direction vector as the node they walk on.
  
-![](Images/PathfindersUseVectorField.PNG)
+![](Images/pathfindersUsingVectorField.gif)
 
 ## Result
 My implementation let's me:
@@ -68,7 +68,7 @@ My implementation let's me:
  - Increasing the pathfinders doesn't reduce efficiency too much.
  - Regenerating the heatmap and vector fields on large maps causes performance drops.
  
- ![](Images/1500Pathfinders.PNG)
+ ![](Images/flowfields1500.gif)
 
 ## Conclusion
 Flow Fields are a very good way to do pathfinding for a lot of pathfinders.
