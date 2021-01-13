@@ -5,7 +5,7 @@ This is an implementation on Flow Fields but what are they?
 Flow Fields are a solution to the pathfinding problem.
 Regular pathfinding requires each pathfinder to calculate a path to reach the end.
 Instead we calculate the path to the end goal for every position the pathfinder can be in.
-Then the pathfinder has to just use the pre-calculated paths to the goal.
+Then the pathfinder only has to use the pre-calculated paths to the goal.
 
 This is mostly used for large groups of pathfinders since this is more efficient.
 
@@ -66,15 +66,14 @@ My implementation let's me:
  
  scalability: 
  - Increasing the pathfinders doesn't reduce efficiency too much.
- - Increasing map size creates larger lag spikes when changing target or envirement
-   since the heatmap and vector field need to be regenerated.
+ - Regenerating the heatmap and vector fields on large maps causes performance drops.
  
  ![](Images/1500Pathfinders.PNG)
 
 ## Conclusion
 Flow Fields are a very good way to do pathfinding for a lot of pathfinders.
 It scales well when increasing the amount of pathfinders.
-It does create spikes of lag if we use a large map and recalculate the target or change the envirement.
+Scaling the map does generate performance drops when changing the target or the environment, because calculating the heatmap and the vector field takes longer.
 
 If you need a large group of pathfinders to go somewhere, this is a great way to use flow fields.
 
