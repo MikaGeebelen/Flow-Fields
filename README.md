@@ -62,9 +62,19 @@ My implementation let's me:
  - makes the pathfinders go to the target
  - place walls to make paths more complex
  
+ ![](Images/flowfields.gif)
+ 
+ scalability: 
+ - Increasing the pathfinders doesn't reduce efficiency too much.
+ - Increasing map size creates larger lag spikes when changing target or envirement
+   since the heatmap and vector field need to be regenerated.
  
  ![](Images/1500Pathfinders.PNG)
 
 ## Conclusion
 Flow Fields are a very good way to do pathfinding for a lot of pathfinders.
+It scales well when increasing the amount of pathfinders.
+It does create spikes of lag if we use a large map and recalculate the target or change the envirement.
+
+If you need a large group of pathfinders to go somewhere, this is a great way to use flow fields.
 
