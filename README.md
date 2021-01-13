@@ -62,6 +62,9 @@ My implementation let's me:
  - makes the pathfinders go to the target
  - place walls to make paths more complex
  
+ 
  ![](Images/1500Pathfinders.PNG)
 
 ## Conclusion
+Flow Fields are a very good way to do pathfinding for a lot of pathfinders.
+
