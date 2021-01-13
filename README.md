@@ -1,8 +1,13 @@
 # Flow fields
 
 ## Description
-This is an implementation on Flow Fields but what are they?
+This is an implementation on Flow Fields but what are they? 
+Flow Fields are a solution to the pathfinding problem.
+Regular pathfinding requires each pathfinder to calculate a path to reach the end.
+Instead we calculate the path to the end goal for every position the pathfinder can be in.
+Then the pathfinder has to just use the pre-calculated paths to the goal.
 
+This is mostly used for large groups of pathfinders since this is more efficient.
 
 ## Implementation
 The way I implemented the flow fields was by following three steps.
@@ -51,3 +56,12 @@ It should result in something like this:
  
 ![](Images/PathfindersUseVectorField.PNG)
 
+## Result
+My implementation let's me:
+ - set a target for the pathfinders 
+ - makes the pathfinders go to the target
+ - place walls to make paths more complex
+ 
+ ![](Images/1500Pathfinders.PNG)
+
+## Conclusion
